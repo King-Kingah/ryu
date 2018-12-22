@@ -187,8 +187,10 @@ class SimpleSwitch13(app_manager.RyuApp):
             print("IP_Header", ip_header)
             print("**** ip_header.dst: " + ip_header.dst)
 
-            self.handle_tcp_packet(datapath, in_port, ip_header, parser, dst_mac, src_mac)
-            return
+            packet_handled = self.handle_tcp_packet(datapath, in_port, ip_header, parser, dst_mac, src_mac)
+            print("##### packet_handled: "+ str(packet_handled))
+            if packet_handled:
+                return
 
         # Send if other packet
         print("******* in # Release packet ")
@@ -202,10 +204,11 @@ class SimpleSwitch13(app_manager.RyuApp):
         datapath.send_msg(out)
 
         # Release packet
-        #self.release_packet(datapath, msg, dst_mac, src_mac, out_port, in_port, actions)
+        # self.release_packet(datapath, msg, dst_mac, src_mac, out_port, in_port, actions)
 
     def handle_tcp_packet(self, datapath, in_port, ip_header, parser, dst_mac, src_mac):
 
+        packet_handled = False
         if ip_header.dst == self.VIRTUAL_IP:
             self.logger.info("------ TCP Packet to 10.0.0.100")
 
@@ -239,10 +242,11 @@ class SimpleSwitch13(app_manager.RyuApp):
                        parser.OFPActionOutput(in_port)]
             self.add_flow(datapath, 20, match, actions)
 
+            self.logger.info("------ Done Adding TCP Rule (From Server)")
             print("<++++++++Reply sent from server having IP: " + str(server_dst_ip) + " to client:" +
                   str(src_mac) + " via load balancer :" + str(self.VIRTUAL_IP) + "++++++++>")
-
-
+            packet_handled = True
+        return packet_handled
 
     def release_packet(self, datapath, msg, dst_mac, src_mac, out_port, in_port, actions):
         ofproto = datapath.ofproto
