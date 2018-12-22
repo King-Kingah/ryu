@@ -157,7 +157,7 @@ class SimpleSwitch13(app_manager.RyuApp):
             else:
                 self.add_flow(datapath, 10, match, actions)
 
-        # Handle ARP Packet to / from Server
+        # Handle ARP Packet 
         print("*** eth.ethertype: " + str(eth.ethertype))
         arpPacket = pkt.get_protocol(arp.arp)
         if arpPacket:
